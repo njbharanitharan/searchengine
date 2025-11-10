@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>🌿 Plant Protocol AI — 3D Forest Universe</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+/* 🌿 RESET */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;font-family:'Poppins',sans-serif;background:#020b04;color:#f8fff8}
+
+/* ===================== 🌲 3D FOREST BACKGROUND ===================== */
+.stage{
+  position:fixed;inset:0;overflow:hidden;
+  perspective:1000px;display:flex;align-items:center;justify-content:center;
+}
+
+.layer{
+  position:absolute;inset:0;
+  background-position:center bottom;
+  background-size:cover;
+  will-change:transform,filter,opacity;
+  transition:transform 1s ease,filter 1s ease;
+}
+
+.layer.sky{
+  background:linear-gradient(180deg,#99dcb5 0%,#357e5f 40%,#04140a 100%);
+  z-index:0;
+}
+
+.layer.mountains{
+  background-image:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=2000&q=80');
+  z-index:1;opacity:0.8;transform:translateZ(-700px) scale(1.4);
+}
+
+.layer.trees-mid{
+  background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80');
+  z-index:2;opacity:0.85;transform:translateZ(-400px) scale(1.2);
+}
+
+.layer.trees-front{
+  background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1800&q=80');
+  z-index:3;opacity:0.95;transform:translateZ(-150px) scale(1.08);
+}
+
+.fog{
+  position:absolute;bottom:0;width:100%;height:60%;
+  background:linear-gradient(180deg,rgba(10,25,10,0) 0%,rgba(10,25,10,0.6) 80%,rgba(2,6,4,0.9) 100%);
+  z-index:5;pointer-events:none;backdrop-filter:blur(5px);
+}
+
+/* ===================== 🌟 FIREFLIES ===================== */
+.firefly{
+  position:absolute;width:6px;height:6px;border-radius:50%;
+  background:rgba(255,255,180,0.85);box-shadow:0 0 12px 4px rgba(255,255,160,0.5);
+  animation:float 10s infinite ease-in-out;
+}
+@keyframes float{
+  0%,100%{transform:translateY(0) scale(1);}
+  50%{transform:translateY(-40px) scale(1.3);}
+}
+
+/* ===================== 💬 MAIN UI ===================== */
+.ui{
+  position:relative;z-index:20;display:flex;align-items:center;justify-content:center;
+  min-height:100vh;width:100%;padding:32px;animation:fadeIn 2s ease;
+}
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.card{
+  width:100%;max-width:1100px;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:20px;backdrop-filter:blur(10px);
+  box-shadow:0 15px 45px rgba(0,0,0,0.6);
+  padding:30px;transition:transform .4s ease,box-shadow .4s ease;
+}
+.card:hover{transform:translateY(-5px);box-shadow:0 20px 60px rgba(0,0,0,0.7)}
+
+/* HEADER */
+.header{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+.logo{
+  width:68px;height:68px;border-radius:16px;
+  background:linear-gradient(135deg,#00ff9d,#00b871);
+  display:flex;align-items:center;justify-content:center;
+  color:#00260e;font-weight:900;font-size:22px;
+  box-shadow:0 8px 24px rgba(0,255,160,0.25);
+}
+.title{
+  font-size:28px;
+  background:linear-gradient(90deg,#8affc3,#00ffa2,#3bffcf);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  font-weight:800;text-shadow:0 0 20px rgba(100,255,150,0.25);
+}
+.subtitle{font-size:14px;color:#c6f2d1}
+
+/* SEARCH */
+.search-row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.search-row input{
+  flex:1;min-width:250px;padding:14px 16px;border-radius:12px;
+  border:none;background:rgba(255,255,255,0.05);color:#e9ffee;font-size:15px;
+  outline:none;transition:background .3s ease;
+}
+.search-row input:focus{background:rgba(255,255,255,0.1)}
+.search-row button{
+  padding:14px 22px;border:none;border-radius:12px;cursor:pointer;
+  background:linear-gradient(90deg,#00d277,#00ffa2);
+  color:#01371d;font-weight:800;box-shadow:0 0 16px rgba(0,255,180,0.25);
+  transition:transform .25s ease;
+}
+.search-row button:hover{transform:scale(1.05)}
+
+/* RESULT */
+.result{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-top:24px;color:#e7ffe8}
+.info{flex:1;min-width:260px}
+.info h2{font-size:22px;margin-bottom:8px;color:#afffc6;text-shadow:0 0 10px rgba(90,255,160,0.3)}
+.info p{line-height:1.5;color:#d0f7d0;font-weight:300}
+.photo{
+  width:320px;min-width:180px;height:220px;border-radius:14px;overflow:hidden;
+  box-shadow:0 14px 40px rgba(0,0,0,0.6);transition:transform .5s ease;
+}
+.photo:hover{transform:scale(1.05)}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* MOBILE */
+@media(max-width:900px){
+  .card{padding:20px}
+  .result{flex-direction:column;align-items:center}
+  .photo{width:100%;max-width:420px;height:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="layer sky" data-depth="0.03"></div>
+  <div class="layer mountains" data-depth="0.08"></div>
+  <div class="layer trees-mid" data-depth="0.15"></div>
+  <div class="layer trees-front" data-depth="0.25"></div>
+  <div class="fog"></div>
+</div>
+
+<!-- FIREFLIES -->
+<script>
+for(let i=0;i<20;i++){
+  const f=document.createElement('div');
+  f.className='firefly';
+  f.style.left=Math.random()*100+'%';
+  f.style.top=Math.random()*100+'%';
+  f.style.animationDelay=Math.random()*5+'s';
+  f.style.animationDuration=8+Math.random()*5+'s';
+  document.body.appendChild(f);
+}
+</script>
+
+<div class="ui">
+  <div class="card">
+    <div class="header">
+      <div class="logo">PP</div>
+      <div>
+        <div class="title">Search Engine integrated AI</div>
+        <div class="subtitle">Explore plants & other stuffs in an immersive 3D forest experience 🌱</div>
+      </div>
+    </div>
+
+    <div class="search-row">
+      <input id="plantInput" type="text" placeholder="e.g. Aloe vera">
+      <button id="searchBtn" onclick="getPlantData()">Search</button>
+    </div>
+
+    <div id="result" class="result">
+      <div class="info">
+        <h2>Welcome</h2>
+        <p>Type any plant name above and press <strong>Search</strong>. You’ll get its details and image fetched live from Wikipedia.</p>
+      </div>
+      <div class="photo">
+        <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80" alt="Forest placeholder">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* 🧠 PARALLAX EFFECT */
+(() => {
+  const stage=document.getElementById('stage');
+  const layers=Array.from(stage.querySelectorAll('.layer'));
+  layers.forEach(l=>l.dataset._depth=l.dataset.depth||0.1);
+  window.addEventListener('mousemove',e=>{
+    const px=(e.clientX/window.innerWidth)-0.5;
+    const py=(e.clientY/window.innerHeight)-0.5;
+    layers.forEach(l=>{
+      const d=parseFloat(l.dataset._depth);
+      const tx=-px*d*60, ty=-py*d*40;
+      l.style.transform=`translate3d(${tx}px,${ty}px,0)`;
+      l.style.filter=`brightness(${1+d*0.1})`;
+    });
+  });
+})();
+
+/* 🌿 FETCH PLANT DATA */
+async function getPlantData(){
+  const q=document.getElementById('plantInput').value.trim();
+  const result=document.getElementById('result');
+  if(!q){return}
+  result.innerHTML=`<div class="info"><h2>Searching…</h2><p>Looking up <b>${q}</b> from Wikipedia...</p></div>`;
+  const url='https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(q);
+  try{
+    const res=await fetch(url);
+    const data=await res.json();
+    const title=data.title||q;
+    const text=data.extract||'No description available.';
+    const img=data.thumbnail ? data.thumbnail.source : 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80';
+    result.innerHTML=`
+      <div class="info"><h2>${title}</h2><p>${text}</p></div>
+      <div class="photo"><img src="${img}" alt="${title}"></div>`;
+  }catch{
+    result.innerHTML=`<div class="info"><h2>Not Found</h2><p>Couldn’t fetch info for ${q}.</p></div>`;
+  }
+}
+</script>
+</body>
+</html>
